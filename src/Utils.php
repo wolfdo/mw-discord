@@ -45,8 +45,8 @@ class DiscordUtils {
 	/**
 	 * Handles sending a webhook to Discord using cURL
 	 */
-	public static function handleDiscord( $emoji, $msg ) {
-		global $wgDiscordWebhookURL, $wgDiscordUseEmojis, $wgDiscordPrependTimestamp, $wgDiscordUseFileGetContents;
+	public static function handleDiscord( $hook, $msg ) {
+		global $wgDiscordWebhookURL, $wgDiscordUseEmojis, $wgDiscordEmojis, $wgDiscordPrependTimestamp, $wgDiscordUseFileGetContents;
 
 		if ( !$wgDiscordWebhookURL ) {
 			// There's nothing in here, so we won't do anything
@@ -76,9 +76,9 @@ class DiscordUtils {
 			$stripped = $dateString . ' ' . $stripped;
 		}
 
-		if ( $wgDiscordUseEmojis ) {
+		if ( $wgDiscordUseEmojis && isset( $wgDiscordEmojis[$hook] ) ) {
 			// Add emoji
-			$stripped = $emoji . ' ' . $stripped;
+			$stripped = $wgDiscordEmojis[$hook] . ' ' . $stripped;
 		}
 
 		DeferredUpdates::addCallableUpdate( function () use ( $stripped, $urls, $wgDiscordUseFileGetContents ) {
