@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Hooks for the Discord extension
  *
@@ -40,15 +41,16 @@ class DiscordHooks {
 		$msgKey = 'discord-edit';
 
 		$isNew = $status->value['new'];
-		if ($isNew == 1) { // is a new page
+		if ( $isNew == 1 ) { // is a new page
 			$msgKey = 'discord-create';
 		}
 
 		$msg = wfMessage( $msgKey, DiscordUtils::createUserLinks( $user ),
 			DiscordUtils::createMarkdownLink( $wikiPage->getTitle(), $wikiPage->getTitle()->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
 			DiscordUtils::createRevisionText( $revision ),
-			( $summary ? ('`' . DiscordUtils::truncateText( $summary ) . '`' ) : '' ) )->plain();
-		DiscordUtils::handleDiscord(':pencil2:', $msg);
+			( $summary ? ( '`' . DiscordUtils::truncateText( $summary ) . '`' ) : '' ) )->plain();
+		DiscordUtils::handleDiscord( ':pencil2:', $msg );
+
 		return true;
 	}
 
@@ -70,9 +72,10 @@ class DiscordHooks {
 
 		$msg = wfMessage( 'discord-articledelete', DiscordUtils::createUserLinks( $user ),
 			DiscordUtils::createMarkdownLink( $article->getTitle(), $article->getTitle()->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
-			( $reason ? ('`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ),
-			$archivedRevisionCount)->plain();
-		DiscordUtils::handleDiscord(':wastebasket:', $msg);
+			( $reason ? ( '`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ),
+			$archivedRevisionCount )->plain();
+		DiscordUtils::handleDiscord( ':wastebasket:', $msg );
+
 		return true;
 	}
 
@@ -95,10 +98,11 @@ class DiscordHooks {
 		}
 
 		$msg = wfMessage( 'discord-articleundelete', DiscordUtils::createUserLinks( $user ),
-			($create ? '' : wfMessage( 'discord-undeleterev' )->text() ),
+			( $create ? '' : wfMessage( 'discord-undeleterev' )->text() ),
 			DiscordUtils::createMarkdownLink( $title, $title->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
-			( $comment ? ('`' . DiscordUtils::truncateText( $comment ) . '`' ) : '' ))->plain();
-		DiscordUtils::handleDiscord(':wastebasket:', $msg);
+			( $comment ? ( '`' . DiscordUtils::truncateText( $comment ) . '`' ) : '' ) )->plain();
+		DiscordUtils::handleDiscord( ':wastebasket:', $msg );
+
 		return true;
 	}
 
@@ -121,9 +125,10 @@ class DiscordHooks {
 		}
 
 		$msg = wfMessage( 'discord-revvisibility', DiscordUtils::createUserLinks( $user ),
-			count($visibilityChangeMap),
+			count( $visibilityChangeMap ),
 			DiscordUtils::createMarkdownLink( $title, $title->getFullUrl( '', '', $proto = PROTO_HTTP ) ) )->plain();
-		DiscordUtils::handleDiscord(':spy:', $msg);
+		DiscordUtils::handleDiscord( ':spy:', $msg );
+
 		return true;
 	}
 
@@ -145,9 +150,10 @@ class DiscordHooks {
 
 		$msg = wfMessage( 'discord-articleprotect', DiscordUtils::createUserLinks( $user ),
 			DiscordUtils::createMarkdownLink( $article->getTitle(), $article->getTitle()->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
-			( $reason ? ('`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ),
-			implode(", ", $protect) )->plain();
-		DiscordUtils::handleDiscord(':lock:', $msg);
+			( $reason ? ( '`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ),
+			implode( ", ", $protect ) )->plain();
+		DiscordUtils::handleDiscord( ':lock:', $msg );
+
 		return true;
 	}
 
@@ -170,9 +176,10 @@ class DiscordHooks {
 		$msg = wfMessage( 'discord-titlemove', DiscordUtils::createUserLinks( $user ),
 			DiscordUtils::createMarkdownLink( $title, $title->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
 			DiscordUtils::createMarkdownLink( $newTitle, $newTitle->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
-			( $reason ? ('`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ),
+			( $reason ? ( '`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ),
 			DiscordUtils::createRevisionText( $revision ) )->plain();
-		DiscordUtils::handleDiscord(':truck:', $msg);
+		DiscordUtils::handleDiscord( ':truck:', $msg );
+
 		return true;
 	}
 
@@ -186,7 +193,8 @@ class DiscordHooks {
 		}
 
 		$msg = wfMessage( 'discord-localusercreated', DiscordUtils::createUserLinks( $user ) )->plain();
-		DiscordUtils::handleDiscord(':wave:', $msg);
+		DiscordUtils::handleDiscord( ':wave:', $msg );
+
 		return true;
 	}
 
@@ -200,16 +208,17 @@ class DiscordHooks {
 		}
 
 		$expiry = $block->getExpiry();
-		if ($expires = strtotime($expiry)) {
-			$expiryMsg = sprintf('%s', date( wfMessage( 'discord-blocktimeformat' )->text(), $expires));
+		if ( $expires = strtotime( $expiry ) ) {
+			$expiryMsg = sprintf( '%s', date( wfMessage( 'discord-blocktimeformat' )->text(), $expires ) );
 		} else {
 			$expiryMsg = $expiry;
 		}
 
 		$msg = wfMessage( 'discord-blockipcomplete', DiscordUtils::createUserLinks( $user ), DiscordUtils::createUserLinks( $block->getTarget() ),
-			( $block->getReasonComment()->text ? ('`' . DiscordUtils::truncateText( $block->getReasonComment()->text ) . '`' ) : '' ),
+			( $block->getReasonComment()->text ? ( '`' . DiscordUtils::truncateText( $block->getReasonComment()->text ) . '`' ) : '' ),
 			$expiryMsg )->plain();
-		DiscordUtils::handleDiscord(':no_entry_sign:', $msg);
+		DiscordUtils::handleDiscord( ':no_entry_sign:', $msg );
+
 		return true;
 	}
 
@@ -223,7 +232,8 @@ class DiscordHooks {
 		}
 
 		$msg = wfMessage( 'discord-unblockusercomplete', DiscordUtils::createUserLinks( $user ), DiscordUtils::createUserLinks( $block->getTarget() ) )->text();
-		DiscordUtils::handleDiscord(':no_entry_sign:', $msg);
+		DiscordUtils::handleDiscord( ':no_entry_sign:', $msg );
+
 		return true;
 	}
 
@@ -236,17 +246,18 @@ class DiscordHooks {
 			return true;
 		}
 
-		if ($performer === false) {
+		if ( $performer === false ) {
 			// Rights were changed by autopromotion, do nothing
 			return true;
 		}
 
 		$msg = wfMessage( 'discord-usergroupschanged', DiscordUtils::createUserLinks( $performer ),
 			DiscordUtils::createUserLinks( $user ),
-			( $reason ? ('`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ),
-			( ( count($added) > 0 ) ? ( '+ ' . join(', ', $added) ) : ''),
-			( ( count($removed) > 0 ) ? ( '- ' . join(', ', $removed) ) : '' ) )->plain();
-		DiscordUtils::handleDiscord(':people_holding_hands:', $msg);
+			( $reason ? ( '`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ),
+			( ( count( $added ) > 0 ) ? ( '+ ' . join( ', ', $added ) ) : '' ),
+			( ( count( $removed ) > 0 ) ? ( '- ' . join( ', ', $removed ) ) : '' ) )->plain();
+		DiscordUtils::handleDiscord( ':people_holding_hands:', $msg );
+
 		return true;
 	}
 
@@ -270,17 +281,18 @@ class DiscordHooks {
 		}
 
 		$comment = $lf->getDescription();
-		$isNewRevision = count($lf->getHistory()) > 0;
+		$isNewRevision = count( $lf->getHistory() ) > 0;
 
 		$msg = wfMessage( 'discord-uploadcomplete', DiscordUtils::createUserLinks( $user ),
 			( $isNewRevision ? wfMessage( 'discord-uploadnewver' )->text() : '' ),
-			DiscordUtils::createMarkdownLink( $lf->getName(), $lf->getTitle()->getFullUrl( '', '', $proto = PROTO_HTTP ) ), 
-			( $comment ? ('`' . DiscordUtils::truncateText( $comment ) . '`' ) : '' ),
-			DiscordUtils::formatBytes($lf->getSize()),
+			DiscordUtils::createMarkdownLink( $lf->getName(), $lf->getTitle()->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
+			( $comment ? ( '`' . DiscordUtils::truncateText( $comment ) . '`' ) : '' ),
+			DiscordUtils::formatBytes( $lf->getSize() ),
 			$lf->getWidth(),
 			$lf->getHeight(),
 			$lf->getMimeType() )->plain();
-		DiscordUtils::handleDiscord(':inbox_tray:', $msg);
+		DiscordUtils::handleDiscord( ':inbox_tray:', $msg );
+
 		return true;
 	}
 
@@ -307,8 +319,9 @@ class DiscordHooks {
 
 		$msg = wfMessage( 'discord-filedeletecomplete', DiscordUtils::createUserLinks( $user ),
 			DiscordUtils::createMarkdownLink( $file->getName(), $file->getTitle()->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
-			( $reason ? ('`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ) )->plain();
-		DiscordUtils::handleDiscord(':wastebasket:', $msg);
+			( $reason ? ( '`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ) )->plain();
+		DiscordUtils::handleDiscord( ':wastebasket:', $msg );
+
 		return true;
 	}
 
@@ -330,8 +343,9 @@ class DiscordHooks {
 
 		$msg = wfMessage( 'discord-fileundeletecomplete', DiscordUtils::createUserLinks( $user ),
 			DiscordUtils::createMarkdownLink( $title, $title->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
-			( $reason ? ('`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ) )->plain();
-		DiscordUtils::handleDiscord(':wastebasket:', $msg);
+			( $reason ? ( '`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ) )->plain();
+		DiscordUtils::handleDiscord( ':wastebasket:', $msg );
+
 		return true;
 	}
 
@@ -355,8 +369,9 @@ class DiscordHooks {
 
 		$msg = wfMessage( 'discord-afterimportpage', DiscordUtils::createUserLinks( $user ),
 			DiscordUtils::createMarkdownLink( $title, $title->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
-			$revCount, $sRevCount)->plain();
-		DiscordUtils::handleDiscord(':books:', $msg);
+			$revCount, $sRevCount )->plain();
+		DiscordUtils::handleDiscord( ':books:', $msg );
+
 		return true;
 	}
 
@@ -376,8 +391,9 @@ class DiscordHooks {
 
 		$msg = wfMessage( 'discord-articlemergecomplete', DiscordUtils::createUserLinks( $user ),
 			DiscordUtils::createMarkdownLink( $targetTitle, $targetTitle->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
-			DiscordUtils::createMarkdownLink( $destTitle, $destTitle->getFullUrl( '', '', $proto = PROTO_HTTP ) ))->plain();
-		DiscordUtils::handleDiscord(':card_box:', $msg);
+			DiscordUtils::createMarkdownLink( $destTitle, $destTitle->getFullUrl( '', '', $proto = PROTO_HTTP ) ) )->plain();
+		DiscordUtils::handleDiscord( ':card_box:', $msg );
+
 		return true;
 	}
 
@@ -385,7 +401,7 @@ class DiscordHooks {
 	 * Called when a revision is approved (Approved Revs extension)
 	 * @see https://github.com/wikimedia/mediawiki-extensions-ApprovedRevs/blob/REL1_34/includes/ApprovedRevs_body.php
 	 */
-	public static function externalonApprovedRevsRevisionApproved ( $output, $title, $rev_id, $content ) {
+	public static function externalonApprovedRevsRevisionApproved( $output, $title, $rev_id, $content ) {
 		global $wgDiscordNoBots;
 
 		$user = RequestContext::getMain()->getUser();
@@ -404,17 +420,20 @@ class DiscordHooks {
 		$revLink = $title->getFullURL( array( 'oldid' => $rev_id ), '', $proto = PROTO_HTTP );
 		$revAuthor = $rev->getUser( Revision::RAW );
 
-		if ($revAuthor === 0) {
-			$revAuthor = DiscordUtils::createUserLinks( User::newFromName($rev->getUserText(), false) );
-		} else if ($revAuthor) {
-			$revAuthor = DiscordUtils::createUserLinks( User::newFromId($revAuthor) );
+		if ( $revAuthor === 0 ) {
+			$revAuthor = DiscordUtils::createUserLinks( User::newFromName( $rev->getUserText(), false ) );
+		} else {
+			if ( $revAuthor ) {
+				$revAuthor = DiscordUtils::createUserLinks( User::newFromId( $revAuthor ) );
+			}
 		}
 
 		$msg = wfMessage( 'discord-approvedrevsrevisionapproved', DiscordUtils::createUserLinks( $user ),
 			DiscordUtils::createMarkdownLink( $title, $title->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
 			DiscordUtils::createMarkdownLink( $rev_id, $revLink ),
-			$revAuthor)->plain();
-		DiscordUtils::handleDiscord(':white_check_mark:', $msg);
+			$revAuthor )->plain();
+		DiscordUtils::handleDiscord( ':white_check_mark:', $msg );
+
 		return true;
 	}
 
@@ -422,7 +441,7 @@ class DiscordHooks {
 	 * Called when a revision is unapproved (Approved Revs extension)
 	 * @see https://github.com/wikimedia/mediawiki-extensions-ApprovedRevs/blob/REL1_34/includes/ApprovedRevs_body.php
 	 */
-	public static function externalonApprovedRevsRevisionUnapproved ( $output, $title, $content ) {
+	public static function externalonApprovedRevsRevisionUnapproved( $output, $title, $content ) {
 		global $wgDiscordNoBots;
 
 		$user = RequestContext::getMain()->getUser();
@@ -437,8 +456,9 @@ class DiscordHooks {
 		}
 
 		$msg = wfMessage( 'discord-approvedrevsrevisionunapproved', DiscordUtils::createUserLinks( $user ),
-			DiscordUtils::createMarkdownLink( $title, $title->getFullUrl( '', '', $proto = PROTO_HTTP ) ))->plain();
-		DiscordUtils::handleDiscord(':white_check_mark:', $msg);
+			DiscordUtils::createMarkdownLink( $title, $title->getFullUrl( '', '', $proto = PROTO_HTTP ) ) )->plain();
+		DiscordUtils::handleDiscord( ':white_check_mark:', $msg );
+
 		return true;
 	}
 
@@ -446,7 +466,7 @@ class DiscordHooks {
 	 * Called when a file is approved (Approved Revs extension)
 	 * @see https://github.com/wikimedia/mediawiki-extensions-ApprovedRevs/blob/REL1_34/includes/ApprovedRevs_body.php
 	 */
-	public static function externalonApprovedRevsFileRevisionApproved ( $parser, $title, $timestamp, $sha1 ) {
+	public static function externalonApprovedRevsFileRevisionApproved( $parser, $title, $timestamp, $sha1 ) {
 		global $wgDiscordNoBots;
 
 		$user = RequestContext::getMain()->getUser();
@@ -465,17 +485,18 @@ class DiscordHooks {
 		$displayedFileUrl = $displayedFile->getCanonicalUrl(); // getFullURL doesn't work quite the same on File classes
 		$uploader = $displayedFile->getUser();
 
-		if (is_string($uploader)) {
-			$uploader = User::newFromName($uploader, false);
+		if ( is_string( $uploader ) ) {
+			$uploader = User::newFromName( $uploader, false );
 		} else {
-			$uploader = User::newFromId($uploader);
+			$uploader = User::newFromId( $uploader );
 		}
 
 		$msg = wfMessage( 'discord-approvedrevsfilerevisionapproved', DiscordUtils::createUserLinks( $user ),
-		    DiscordUtils::createMarkdownLink( $title, $title->getFullURL('', '', $proto = PROTO_HTTP) ),
+			DiscordUtils::createMarkdownLink( $title, $title->getFullURL( '', '', $proto = PROTO_HTTP ) ),
 			DiscordUtils::createMarkdownLink( 'direct', $displayedFileUrl ),
 			DiscordUtils::createUserLinks( $uploader ) )->plain();
-		DiscordUtils::handleDiscord(':white_check_mark:', $msg);
+		DiscordUtils::handleDiscord( ':white_check_mark:', $msg );
+
 		return true;
 	}
 
@@ -483,7 +504,7 @@ class DiscordHooks {
 	 * Called when a file is unapproved (Approved Revs extension)
 	 * @see https://github.com/wikimedia/mediawiki-extensions-ApprovedRevs/blob/REL1_34/includes/ApprovedRevs_body.php
 	 */
-	public static function externalonApprovedRevsFileRevisionUnapproved ( $parser, $title ) {
+	public static function externalonApprovedRevsFileRevisionUnapproved( $parser, $title ) {
 		global $wgDiscordNoBots;
 
 		$user = RequestContext::getMain()->getUser();
@@ -498,8 +519,9 @@ class DiscordHooks {
 		}
 
 		$msg = wfMessage( 'discord-approvedrevsfilerevisionunapproved', DiscordUtils::createUserLinks( $user ),
-			DiscordUtils::createMarkdownLink( $title, $title->getFullUrl( '', '', $proto = PROTO_HTTP ) ))->plain();
-		DiscordUtils::handleDiscord(':white_check_mark:', $msg);
+			DiscordUtils::createMarkdownLink( $title, $title->getFullUrl( '', '', $proto = PROTO_HTTP ) ) )->plain();
+		DiscordUtils::handleDiscord( ':white_check_mark:', $msg );
+
 		return true;
 	}
 }
