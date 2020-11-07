@@ -401,7 +401,7 @@ class DiscordHooks {
 	 * Called when a revision is approved (Approved Revs extension)
 	 * @see https://github.com/wikimedia/mediawiki-extensions-ApprovedRevs/blob/REL1_34/includes/ApprovedRevs_body.php
 	 */
-	public static function externalonApprovedRevsRevisionApproved( $output, $title, $rev_id, $content ) {
+	public static function externalOnApprovedRevsRevisionApproved( $output, $title, $rev_id, $content ) {
 		global $wgDiscordNoBots;
 
 		$user = RequestContext::getMain()->getUser();
@@ -441,7 +441,7 @@ class DiscordHooks {
 	 * Called when a revision is unapproved (Approved Revs extension)
 	 * @see https://github.com/wikimedia/mediawiki-extensions-ApprovedRevs/blob/REL1_34/includes/ApprovedRevs_body.php
 	 */
-	public static function externalonApprovedRevsRevisionUnapproved( $output, $title, $content ) {
+	public static function externalOnApprovedRevsRevisionUnapproved( $output, $title, $content ) {
 		global $wgDiscordNoBots;
 
 		$user = RequestContext::getMain()->getUser();
@@ -466,7 +466,7 @@ class DiscordHooks {
 	 * Called when a file is approved (Approved Revs extension)
 	 * @see https://github.com/wikimedia/mediawiki-extensions-ApprovedRevs/blob/REL1_34/includes/ApprovedRevs_body.php
 	 */
-	public static function externalonApprovedRevsFileRevisionApproved( $parser, $title, $timestamp, $sha1 ) {
+	public static function externalOnApprovedRevsFileRevisionApproved( $parser, $title, $timestamp, $sha1 ) {
 		global $wgDiscordNoBots;
 
 		$user = RequestContext::getMain()->getUser();
@@ -504,7 +504,7 @@ class DiscordHooks {
 	 * Called when a file is unapproved (Approved Revs extension)
 	 * @see https://github.com/wikimedia/mediawiki-extensions-ApprovedRevs/blob/REL1_34/includes/ApprovedRevs_body.php
 	 */
-	public static function externalonApprovedRevsFileRevisionUnapproved( $parser, $title ) {
+	public static function externalOnApprovedRevsFileRevisionUnapproved( $parser, $title ) {
 		global $wgDiscordNoBots;
 
 		$user = RequestContext::getMain()->getUser();
