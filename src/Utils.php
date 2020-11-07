@@ -91,7 +91,7 @@ class DiscordUtils {
 				foreach ( $urls as &$value ) {
 					$contextOpts = [
 						'http' => [
-							'header' => 'Content-Type: application/x-www-form-urlencoded',
+							'header' => 'Content-Type: application/json',
 							'method' => 'POST', // Send as a POST request
 							'user_agent' => $user_agent, // Add a unique user agent
 							'content' => $json, // Send the JSON in the POST request
