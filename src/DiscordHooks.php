@@ -1,5 +1,15 @@
 <?php
 
+use MediaWiki\Linker\LinkTarget;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Storage\EditResult;
+use MediaWiki\User\UserIdentity;
+
+use Block;
+use DatabaseBlock;
+use Title;
+use User;
+
 /**
  * Hooks for the Discord extension
  *
@@ -9,12 +19,14 @@
 class DiscordHooks {
 	/**
 	 * Called when a page is created or edited
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/PageContentSaveComplete
+	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/PageSaveComplete
 	 */
-	public static function onPageContentSaveComplete( &$wikiPage, &$user, $content, $summary, $isMinor, $isWatch, $section, &$flags, $revision, &$status, $baseRevId, $undidRevId ) {
+	public static function onPageSaveComplete( WikiPage $wikiPage, UserIdentity $userIdentity, $summary, $flags, RevisionRecord $revisionRecord, EditResult $editResult ) {
 		global $wgDiscordNoBots, $wgDiscordNoMinor, $wgDiscordNoNull;
 
-		$hook = 'PageContentSaveComplete';
+		$hook = 'PageSaveComplete';
+
+		$user = User::newFromIdentity( $userIdentity );
 
 		if ( DiscordUtils::isDisabled( $hook, $wikiPage->getTitle()->getNamespace(), $user ) ) {
 			return true;
@@ -25,31 +37,26 @@ class DiscordHooks {
 			return true;
 		}
 
-		if ( $wgDiscordNoMinor && $isMinor ) {
+		if ( $wgDiscordNoMinor && $revisionRecord->isMinor() ) {
 			// Don't continue, this is a minor edit
 			return true;
 		}
 
-		if ( $wgDiscordNoNull && ( !$revision || is_null( $status->getValue()['revision'] ) ) ) {
+		if ( $wgDiscordNoNull && $editResult->isNullEdit() ) {
 			// Don't continue, this is a null edit
 			return true;
 		}
 
-		if ( $wikiPage->getTitle()->inNamespace( NS_FILE ) && is_null( $revision->getPrevious() ) ) {
+		if ( $wikiPage->getTitle()->inNamespace( NS_FILE ) && $editResult->isNew() ) {
 			// Don't continue, it's a new file which onUploadComplete will handle instead
 			return true;
 		}
 
-		$msgKey = 'discord-edit';
-
-		$isNew = $status->value['new'];
-		if ( $isNew == 1 ) { // is a new page
-			$msgKey = 'discord-create';
-		}
+		$msgKey = $editResult->isNew() ? 'discord-create' : 'discord-edit';
 
 		$msg = wfMessage( $msgKey, DiscordUtils::createUserLinks( $user ),
 			DiscordUtils::createMarkdownLink( $wikiPage->getTitle(), $wikiPage->getTitle()->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
-			DiscordUtils::createRevisionText( $revision ),
+			DiscordUtils::createRevisionText( $revisionRecord ),
 			( $summary ? ( '`' . DiscordUtils::truncateText( $summary ) . '`' ) : '' ) )->plain();
 
 		DiscordUtils::handleDiscord( $hook, $msg );
@@ -147,12 +154,12 @@ class DiscordHooks {
 	 * Called when a page is protected (or unprotected)
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ArticleProtectComplete
 	 */
-	public static function onArticleProtectComplete( &$article, &$user, $protect, $reason ) {
+	public static function onArticleProtectComplete( &$wikiPage, &$user, $limit, $reason ) {
 		global $wgDiscordNoBots;
 
 		$hook = 'ArticleProtectComplete';
 
-		if ( DiscordUtils::isDisabled( $hook, $article->getTitle()->getNamespace(), $user ) ) {
+		if ( DiscordUtils::isDisabled( $hook, $wikiPage->getTitle()->getNamespace(), $user ) ) {
 			return true;
 		}
 
@@ -162,9 +169,9 @@ class DiscordHooks {
 		}
 
 		$msg = wfMessage( 'discord-articleprotect', DiscordUtils::createUserLinks( $user ),
-			DiscordUtils::createMarkdownLink( $article->getTitle(), $article->getTitle()->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
+			DiscordUtils::createMarkdownLink( $wikiPage->getTitle(), $wikiPage->getTitle()->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
 			( $reason ? ( '`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ),
-			implode( ", ", $protect ) )->plain();
+			implode( ", ", $limit ) )->plain();
 
 		DiscordUtils::handleDiscord( $hook, $msg );
 
@@ -173,14 +180,19 @@ class DiscordHooks {
 
 	/**
 	 * Called when a page is moved
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/TitleMoveComplete
+	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/PageMoveComplete
 	 */
-	public static function onTitleMoveComplete( Title &$title, Title &$newTitle, User $user, $oldid, $newid, $reason, Revision $revision ) {
+	public static function onPageMoveComplete( LinkTarget $oldLinkTarget, LinkTarget $newLinkTarget, UserIdentity $userIdentity, $pageid, $redirid, $reason, RevisionRecord $revisionRecord ) {
 		global $wgDiscordNoBots;
 
-		$hook = 'TitleMoveComplete';
+		$hook = 'PageMoveComplete';
 
-		if ( DiscordUtils::isDisabled( $hook, $title->getNamespace(), $user ) ) {
+		$oldTitle = Title::newFromLinkTarget( $oldLinkTarget );
+		$newTitle = Title::newFromLinkTarget( $newLinkTarget );
+
+		$user = User::newFromIdentity( $userIdentity );
+
+		if ( DiscordUtils::isDisabled( $hook, $oldTitle->getNamespace(), $user ) ) {
 			return true;
 		}
 
@@ -190,10 +202,10 @@ class DiscordHooks {
 		}
 
 		$msg = wfMessage( 'discord-titlemove', DiscordUtils::createUserLinks( $user ),
-			DiscordUtils::createMarkdownLink( $title, $title->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
+			DiscordUtils::createMarkdownLink( $oldTitle, $oldTitle->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
 			DiscordUtils::createMarkdownLink( $newTitle, $newTitle->getFullUrl( '', '', $proto = PROTO_HTTP ) ),
 			( $reason ? ( '`' . DiscordUtils::truncateText( $reason ) . '`' ) : '' ),
-			DiscordUtils::createRevisionText( $revision ) )->plain();
+			DiscordUtils::createRevisionText( $revisionRecord ) )->plain();
 
 		DiscordUtils::handleDiscord( $hook, $msg );
 
@@ -222,7 +234,7 @@ class DiscordHooks {
 	 * Called when a user is blocked
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/BlockIpComplete
 	 */
-	public static function onBlockIpComplete( Block $block, User $user ) {
+	public static function onBlockIpComplete( DatabaseBlock $block, User $user ) {
 		$hook = 'BlockIpComplete';
 
 		if ( DiscordUtils::isDisabled( $hook, NULL, $user ) ) {
@@ -267,7 +279,7 @@ class DiscordHooks {
 	 * Called when a user's rights are changed
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/UserGroupsChanged
 	 */
-	public static function onUserGroupsChanged( User $user, array $added, array $removed, $performer, $reason ) {
+	public static function onUserGroupsChanged( User $user, $added, $removed, $performer, $reason, $oldUGMs, $newUGMs ) {
 		$hook = 'UserGroupsChanged';
 
 		if ( DiscordUtils::isDisabled( $hook, NULL, $performer ) ) {
@@ -294,7 +306,7 @@ class DiscordHooks {
 	 * Called when a file upload is complete
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/UploadComplete
 	 */
-	public static function onUploadComplete( &$image ) {
+	public static function onUploadComplete( $image ) {
 		global $wgDiscordNoBots;
 
 		$hook = 'UploadComplete';
@@ -414,6 +426,10 @@ class DiscordHooks {
 		return true;
 	}
 
+	/**
+	 * Occurs after merging to article using Special:Mergehistory
+	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ArticleMergeComplete
+	 */
 	public static function onArticleMergeComplete( $targetTitle, $destTitle ) {
 		global $wgDiscordNoBots;
 
@@ -440,7 +456,7 @@ class DiscordHooks {
 
 	/**
 	 * Called when a revision is approved (Approved Revs extension)
-	 * @see https://github.com/wikimedia/mediawiki-extensions-ApprovedRevs/blob/REL1_34/includes/ApprovedRevs_body.php
+	 * @see https://www.mediawiki.org/wiki/Extension:Approved_Revs/Hooks/ApprovedRevsRevisionApproved
 	 */
 	public static function externalOnApprovedRevsRevisionApproved( $output, $title, $rev_id, $content ) {
 		global $wgDiscordNoBots;
@@ -482,7 +498,7 @@ class DiscordHooks {
 
 	/**
 	 * Called when a revision is unapproved (Approved Revs extension)
-	 * @see https://github.com/wikimedia/mediawiki-extensions-ApprovedRevs/blob/REL1_34/includes/ApprovedRevs_body.php
+	 * @see https://www.mediawiki.org/wiki/Extension:Approved_Revs/Hooks/ApprovedRevsRevisionUnapproved
 	 */
 	public static function externalOnApprovedRevsRevisionUnapproved( $output, $title, $content ) {
 		global $wgDiscordNoBots;
@@ -509,7 +525,7 @@ class DiscordHooks {
 
 	/**
 	 * Called when a file is approved (Approved Revs extension)
-	 * @see https://github.com/wikimedia/mediawiki-extensions-ApprovedRevs/blob/REL1_34/includes/ApprovedRevs_body.php
+	 * @see https://www.mediawiki.org/wiki/Extension:Approved_Revs/Hooks/ApprovedRevsFileRevisionApproved
 	 */
 	public static function externalOnApprovedRevsFileRevisionApproved( $parser, $title, $timestamp, $sha1 ) {
 		global $wgDiscordNoBots;
@@ -549,7 +565,7 @@ class DiscordHooks {
 
 	/**
 	 * Called when a file is unapproved (Approved Revs extension)
-	 * @see https://github.com/wikimedia/mediawiki-extensions-ApprovedRevs/blob/REL1_34/includes/ApprovedRevs_body.php
+	 * @see https://www.mediawiki.org/wiki/Extension:Approved_Revs/Hooks/ApprovedRevsFileRevisionUnapproved
 	 */
 	public static function externalOnApprovedRevsFileRevisionUnapproved( $parser, $title ) {
 		global $wgDiscordNoBots;
