@@ -67,24 +67,10 @@ class DiscordUtils {
 			}
 		}
 
-		// Strip whitespace to just one space
-		$stripped = preg_replace( '/\s+/', ' ', $msg );
+		$json = self::toJson( $hook, $msg );
 
-		if ( $wgDiscordPrependTimestamp ) {
-			// Add timestamp
-			$dateString = gmdate( wfMessage( 'discord-timestampformat' )->text() );
-			$stripped = $dateString . ' ' . $stripped;
-		}
-
-		if ( $wgDiscordUseEmojis && isset( $wgDiscordEmojis[$hook] ) ) {
-			// Add emoji
-			$stripped = $wgDiscordEmojis[$hook] . ' ' . $stripped;
-		}
-
-		DeferredUpdates::addCallableUpdate( function () use ( $stripped, $urls, $wgDiscordUseFileGetContents ) {
+		DeferredUpdates::addCallableUpdate( function () use ( $json, $urls, $wgDiscordUseFileGetContents ) {
 			$user_agent = 'mw-discord/1.0 (github.com/jaydenkieran)';
-			$json_data = [ 'content' => "$stripped" ];
-			$json = json_encode( $json_data );
 
 			if ( $wgDiscordUseFileGetContents ) {
 				// They want to use file_get_contents
@@ -243,5 +229,41 @@ class DiscordUtils {
 		}
 
 		return $text;
+	}
+
+	private static function toJson( $hook, $msg ) {
+		global $wgDiscordPrependTimestamp, $wgDiscordUseEmojis, $wgDiscordEmojis, $wgDiscordUseEmbed, $wgDiscordEmbedColors;
+
+		// Strip whitespace to just one space
+		$message = preg_replace( '/\s+/', ' ', $msg );
+
+		if ( $wgDiscordPrependTimestamp ) {
+			// Add timestamp
+			$dateString = gmdate( wfMessage( 'discord-timestampformat' )->text() );
+			$message = $dateString . ' ' . $message;
+		}
+
+		if ( $wgDiscordUseEmojis && isset( $wgDiscordEmojis[$hook] ) ) {
+			// Add emoji
+			$message = $wgDiscordEmojis[$hook] . ' ' . $message;
+		}
+
+		$json_data = null;
+
+		if ( $wgDiscordUseEmbed ) {
+			$embed = [
+				'description' => $message,
+			];
+
+			if ( isset( $wgDiscordEmbedColors[$hook] ) ) {
+				$embed['color'] = $wgDiscordEmbedColors[$hook];
+			}
+
+			$json_data = [ 'embeds' => [ $embed ] ];
+		} else {
+			$json_data = [ 'content' => $message ];
+		}
+
+		return json_encode( $json_data );
 	}
 }

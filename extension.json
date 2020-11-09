@@ -41,6 +41,28 @@
 			"ApprovedRevsRevisionUnapproved": ":white_check_mark:",
 			"ApprovedRevsFileRevisionApproved": ":white_check_mark:",
 			"ApprovedRevsFileRevisionUnapproved": ":white_check_mark:"
+		},
+		"DiscordUseEmbed": false,
+		"DiscordEmbedColors": {
+			"PageContentSaveComplete": 16369483,
+			"ArticleDeleteComplete": 7174271,
+			"ArticleUndelete": 7174271,
+			"ArticleRevisionVisibilitySet": 6715265,
+			"ArticleProtectComplete": 16755763,
+			"TitleMoveComplete": 13424349,
+			"LocalUserCreated": 16768093,
+			"BlockIpComplete": 14495300,
+			"UnblockUserComplete": 14495300,
+			"UserGroupsChanged": 6066491,
+			"UploadComplete": 7844437,
+			"FileDeleteComplete": 7174271,
+			"FileUndeleteComplete": 7174271,
+			"AfterImportPage": 9660109,
+			"ArticleMergeComplete": 14871022,
+			"ApprovedRevsRevisionApproved": 7976019,
+			"ApprovedRevsRevisionUnapproved": 7976019,
+			"ApprovedRevsFileRevisionApproved": 7976019,
+			"ApprovedRevsFileRevisionUnapproved": 7976019
 		}
 	},
 	"AutoloadClasses": {
